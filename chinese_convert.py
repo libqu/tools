@@ -63,7 +63,14 @@ def get_output_path(file_path, input_dir, output_dir):
 def convert_file(file_path, input_dir, output_dir, direction):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
-        soup = BeautifulSoup(content, 'lxml')
+
+        # Determine the parser based on the file extension
+        if file_path.endswith('.xhtml'):
+            parser = 'lxml'
+        else:
+            parser = 'xml'
+
+        soup = BeautifulSoup(content, parser)
 
         # Iterate through text in XML, XHTML, SVG and convert
         for text in soup.find_all(string=True):
