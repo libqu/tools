@@ -31,30 +31,8 @@ import os
 import json
 from lxml import etree
 import utils
-
-RULES = """
-[
-    {
-        "name": "default",
-        "location": ["./"],
-        "extension": ["svg", "xhtml"],
-        "tag": ["h", "p", "text", "figcaption"],
-        "switch": "prompt",
-        "skip_file": []
-    },
-    {
-        "name": "punctuation_line_end",
-        "extension": ["xhtml"],
-        "tag": ["p", "figcaption"],
-        "switch": "prompt",
-        "skip_file": ["loi.xhtml", "titlepage.xhtml"]
-    }
-]
-"""
-
-RED_BOLD = "\033[1;31m"
-BLUE_BOLD = "\033[1;34m"
-RESET = "\033[0m"
+from utils import get_current_branch
+from data import RULES, text_style
 
 def process_rule(rule, file_path):
     parser = etree.HTMLParser(recover=True)  # recover=True helps in parsing malformed XML
@@ -96,7 +74,15 @@ def process_rule(rule, file_path):
         content = '\n' + content
         getattr(utils, rule["name"])(content, file_path, rule)
 
-def apply_rule(rule, path):
+def apply_rule(rule, path, rules):
+    # Add missing key value to rule
+    rule_default = next((d for d in rules if d["name"] == "default"), None)
+    if rule_default and rule:
+        # Add from default
+        for key, value in rule_default.items():
+            if key not in rule:
+                rule[key] = value
+
     for root, dirs, files in os.walk(path):
         # Modify 'dirs' in-place to remove directories that start with a dot.
         # This also ensures that os.walk doesn't traverse into these directories.
@@ -107,30 +93,8 @@ def apply_rule(rule, path):
             check_name = os.path.basename(file) not in rule["skip_file"]
             check_extension = file.split('.')[-1] in rule["extension"]
             if check_hidden and check_name and check_extension:
-                # print(f"processing file {file}") # debug
                 file_path = os.path.join(root, file)
                 process_rule(rule, file_path)
-    
-import os
-import subprocess
-
-def get_current_branch(path):
-    """Get the current git branch and the repo path."""
-    while path:
-        if os.path.isdir(os.path.join(path, '.git')):
-            result = subprocess.run(
-                ['git', '-C', path, 'rev-parse', '--abbrev-ref', 'HEAD'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if result.returncode == 0:
-                return result.stdout.strip(), os.path.abspath(path)
-        
-        # Move up in directory tree
-        parent = os.path.dirname(path)
-        if parent == path:  # reached the root
-            break
-        path = parent
-
-    return None, None
 
 def main():
     rules = json.loads(RULES)
@@ -150,26 +114,26 @@ def main():
         branch_name, repo_path = get_current_branch(path)
 
         if not branch_name: 
-            print(f"path: {RED_BOLD}{os.path.abspath(path)}{RESET}")
-            print(f"Git repository {RED_BOLD}not found{RESET} in the path. Do you want to continue anyway?")
+            print(f"path: {text_style.RED_BOLD}{os.path.abspath(path)}{text_style.RESET}")
+            print(f"Git repository {text_style.RED_BOLD}not found{text_style.RESET} in the path. Do you want to continue anyway?")
             choice = input("(y/n): ").strip().lower()
             if choice != 'y':
-                sys.exit(1)
+                sys.exit(0)
         elif branch_name != "base":
-            print(f"git repo: {RED_BOLD}{repo_path}{RESET}")
-            print(f"branch: {RED_BOLD}{branch_name}{RESET}")
-            print(f"It is advised to proofreading in {BLUE_BOLD}base{RESET} branch. Do you want to continue anyway?")
+            print(f"git repo: {text_style.RED_BOLD}{repo_path}{text_style.RESET}")
+            print(f"branch: {text_style.RED_BOLD}{branch_name}{text_style.RESET}")
+            print(f"It is advised to proofreading in {text_style.BLUE_BOLD}base{text_style.RESET} branch. Do you want to continue anyway?")
             choice = input("(y/n): ").strip().lower()
             if choice != 'y':
-                sys.exit(1)
+                sys.exit(0)
 
     if rule_name == "all" or rule_name is None:
         for rule in rules:
-            apply_rule(rule, path)
+            apply_rule(rule, path, rules)
     else:
         for rule in rules:
             if rule["name"] == rule_name:
-                apply_rule(rule, path)
+                apply_rule(rule, path, rules)
                 break
         else:
             print(f"Rule named {rule_name} not found.")

@@ -34,12 +34,16 @@ Install Dependencies:
     pip install OpenCC beautifulsoup4 lxml
 """
 
+# Todo:
+#   - Reduce manual work during convert.
+
 import sys
 import os
 from opencc import OpenCC
 from bs4 import BeautifulSoup
 import unicodedata
 import glob
+from proofreading.utils import replace_text
 
 def is_chinese_char(char):
     """Check if the character is a Chinese character."""
@@ -47,12 +51,21 @@ def is_chinese_char(char):
 
 def convert_text(input_text, direction):
     if direction == "t2s":
+        lang_dest = "zh-Hans"
         converter = OpenCC('t2s.json')
     elif direction == "s2t":
+        lang_dest = "zh-Hant"
         converter = OpenCC('s2t.json')
     else:
         raise ValueError(f"Invalid conversion direction: {direction}")
-    return converter.convert(input_text) if any(is_chinese_char(c) for c in input_text) else input_text
+    
+    # Todo:
+    #   - Better way interact with OpenCC.
+    #   - More accurate lang detection.
+    #   - Disable edit in function replace_text.
+    text = converter.convert(input_text) if any(is_chinese_char(c) for c in input_text) else input_text
+    text = replace_text(text, lang_dest, 1, "/")  # pass fake line number and file path here
+    return text
 
 def get_output_path(file_path, input_dir, output_dir):
     # Get the relative path of the file to the input directory
