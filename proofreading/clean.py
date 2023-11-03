@@ -4,18 +4,11 @@ from bs4 import BeautifulSoup, NavigableString
 import data
 from data import RULES, text_style
 from utils import get_current_branch, replace_text
+from data import zh_chars, numbers, alphanumeric, zh_punct, zh_chars_punct
 
 # Todo:
 #   - Add lang check before run functions.
 #   - Order of execution of functions.
-
-zh_chars = r'[\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df\U0002a700-\U0002b73f\U0002b740-\U0002b81f\U0002b820-\U0002ceaf\U0002ceb0-\U0002ebef\U00030000-\U0003134f]'
-numbers = r'[0-9]'
-alphanumeric = r'[A-Za-z0-9]'
-typography_quotation = r'[“”‘’]'
-full_width_punct = r'[，。！？、：；…—～《》「」『』【】〔〕〈〉〖〗〘〙〚〛（）［］｛｝｟｠｢｣]'
-zh_punct = typography_quotation[:-1] + full_width_punct[1:]
-zh_chars_punct = f'{zh_chars[:-1]}{zh_punct[1:]}'
 
 def chinese_spacing(content, *_):  # only use the first argument
     # Add one space between Chinese and alphanumeric OR alphanumeric and Chinese

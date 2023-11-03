@@ -41,13 +41,13 @@ import sys
 import os
 from opencc import OpenCC
 from bs4 import BeautifulSoup
-import unicodedata
-import glob
+import glob, re
 from proofreading.utils import replace_text
+from proofreading.data import zh_chars
 
-def is_chinese_char(char):
-    """Check if the character is a Chinese character."""
-    return 'CJK UNIFIED' in unicodedata.name(char, '')
+def contains_chinese_character(text):
+    result = bool(re.search(zh_chars, text))
+    return result
 
 def convert_text(input_text, direction):
     if direction == "t2s":
@@ -63,7 +63,8 @@ def convert_text(input_text, direction):
     #   - Better way interact with OpenCC.
     #   - More accurate lang detection.
     #   - Disable edit in function replace_text.
-    text = converter.convert(input_text) if any(is_chinese_char(c) for c in input_text) else input_text
+    if contains_chinese_character(text):
+        text = converter.convert(input_text)
     text = replace_text(text, lang_dest, 1, "/", True)  # pass fake line number and file path here
     return text
 

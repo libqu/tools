@@ -7,6 +7,15 @@ html_text_tags = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "figcaption", "title"
 
 html_like_extensions = ["html", "htm", "xhtml"]
 
+# characters and punctuations
+zh_chars = r'[\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df\U0002a700-\U0002b73f\U0002b740-\U0002b81f\U0002b820-\U0002ceaf\U0002ceb0-\U0002ebef\U00030000-\U0003134f]'
+numbers = r'[0-9]'
+alphanumeric = r'[A-Za-z0-9]'
+typography_quotation = r'[“”‘’]'
+full_width_punct = r'[，。！？、：；…—～《》「」『』【】〔〕〈〉〖〗〘〙〚〛（）［］｛｝｟｠｢｣]'
+zh_punct = typography_quotation[:-1] + full_width_punct[1:]
+zh_chars_punct = f'{zh_chars[:-1]}{zh_punct[1:]}'
+
 RULES = f'''
 [
     {{
