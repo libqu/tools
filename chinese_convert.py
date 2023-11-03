@@ -52,10 +52,10 @@ def is_chinese_char(char):
 def convert_text(input_text, direction):
     if direction == "t2s":
         lang_dest = "zh-Hans"
-        converter = OpenCC('t2s.json')
+        converter = OpenCC('tw2sp.json')  # use tw2sp for better coverage
     elif direction == "s2t":
         lang_dest = "zh-Hant"
-        converter = OpenCC('s2t.json')
+        converter = OpenCC('s2twp.json')  # use s2twp for better coverage
     else:
         raise ValueError(f"Invalid conversion direction: {direction}")
     
@@ -64,7 +64,7 @@ def convert_text(input_text, direction):
     #   - More accurate lang detection.
     #   - Disable edit in function replace_text.
     text = converter.convert(input_text) if any(is_chinese_char(c) for c in input_text) else input_text
-    text = replace_text(text, lang_dest, 1, "/")  # pass fake line number and file path here
+    text = replace_text(text, lang_dest, 1, "/", True)  # pass fake line number and file path here
     return text
 
 def get_output_path(file_path, input_dir, output_dir):

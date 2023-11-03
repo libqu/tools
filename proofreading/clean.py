@@ -86,7 +86,7 @@ def process_file(rule, file_path):
             if isinstance(child, NavigableString):
                 if hasattr(child, 'sourceline'):
                     line_num = child.sourceline
-                adjusted_text = globals()[rule["name"]](child, lang, line_num, file_path)
+                adjusted_text = globals()[rule["name"]](child, lang, line_num, file_path, False)
                 child.replace_with(adjusted_text)
             else:
                 recursive_extract(child, lang, line_num)

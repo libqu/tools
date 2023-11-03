@@ -69,7 +69,7 @@ def get_single_keypress():
     else:
         raise NotImplementedError("Platform not supported")
     
-def replace_text(text, lang, line_num, file_path):
+def replace_text(text, lang, line_num, file_path, auto_only=False):
     # Todo:
     #   - Options to replace what if found multiple in one chunk.
 
@@ -91,6 +91,8 @@ def replace_text(text, lang, line_num, file_path):
             # If switch is 'auto', replace directly
             if value['switch'] == 'auto':
                 text = text.replace(key, value['replace'])
+            elif auto_only:
+                continue  # skip non-auto
             else:
                 # Show the replace prompt with highlighting
                 highlighted_text = highlight_text(text, key, RED_BOLD)
@@ -104,6 +106,6 @@ def replace_text(text, lang, line_num, file_path):
                     text = text.replace(key, value['replace'])
                 elif user_input == 'e':
                     os.system(f'gnome-terminal -t "clean: replace" --hide-menubar -- vim +{line_num} {file_path}')  # Gnome
-                    break
+                    continue
 
     return text
