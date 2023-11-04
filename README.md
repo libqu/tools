@@ -1,6 +1,6 @@
 ## Todo
 ### Improve
-- [ ] The clean feature process child from BeautifulSoup will process partial of one line sometimes. (For example when <a> or <span> exist in <p>.)
+- [ ] The clean feature process child from BeautifulSoup will process partial of one line sometimes. (For example when `<a>` or `<span>` exist in `<p>`.)
 
 ### SE Tools
 - [ ] `se typogrify` use smartypants for convert quotations which works badly in Chinese text.
